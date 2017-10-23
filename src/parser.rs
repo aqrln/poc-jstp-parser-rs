@@ -1,7 +1,7 @@
-use std::str;
-
-use nom::{alphanumeric, IResult};
+use nom::IResult;
 use value::JstpValue;
+
+use string_parser::string;
 
 named!(undefined, tag!("undefined"));
 
@@ -29,32 +29,13 @@ named!(
 );
 
 named!(
-    string<&str>,
-    alt!(
-        single_quote_string => { |s| s }
-    )
-);
-
-named!(
-    single_quote_string<&str>,
-    delimited!(
-        tag!("'"),
-        map_res!(
-            escaped!(call!(alphanumeric), '\\', one_of!("'n\\")),
-            str::from_utf8
-        ),
-        tag!("'")
-    )
-);
-
-named!(
     value<JstpValue>,
     ws!(alt!(
         undefined => { |_| JstpValue::Undefined } |
         null => { |_| JstpValue::Null } |
         boolean => { |b| JstpValue::Bool(b) } |
         array => { |v| JstpValue::Array(v) } |
-        string => { |s| JstpValue::String(String::from(s)) }
+        string => { |s| JstpValue::String(s) }
     ))
 );
 
