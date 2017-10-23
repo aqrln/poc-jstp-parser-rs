@@ -3,33 +3,33 @@ use value::JstpValue;
 
 use string_parser::string;
 
-named!(undefined, tag!("undefined"));
+named!(undefined<&str, &str>, tag_s!("undefined"));
 
-named!(null, tag!("null"));
+named!(null<&str, &str>, tag_s!("null"));
 
 named!(
-    boolean<bool>,
+    boolean<&str, bool>,
     alt!(
-        tag!("true") => { |_| true } |
-        tag!("false") => { |_| false }
+        tag_s!("true") => { |_| true } |
+        tag_s!("false") => { |_| false }
     )
 );
 
 named!(
-    array<Vec<JstpValue>>,
+    array<&str, Vec<JstpValue>>,
     ws!(delimited!(
-        tag!("["),
+        tag_s!("["),
         many0!(alt!(
-            tag!(",") => { |_| JstpValue::Undefined } |
-            terminated!(value, tag!(",")) => { |v| v } |
-            terminated!(value, peek!(tag!("]"))) => { |v| v }
+            tag_s!(",") => { |_| JstpValue::Undefined } |
+            terminated!(value, tag_s!(",")) => { |v| v } |
+            terminated!(value, peek!(tag_s!("]"))) => { |v| v }
         )),
-        tag!("]")
+        tag_s!("]")
     ))
 );
 
 named!(
-    value<JstpValue>,
+    value<&str, JstpValue>,
     ws!(alt!(
         undefined => { |_| JstpValue::Undefined } |
         null => { |_| JstpValue::Null } |
@@ -39,7 +39,7 @@ named!(
     ))
 );
 
-pub fn parse(data: &[u8]) -> Option<(JstpValue, &[u8])> {
+pub fn parse(data: &str) -> Option<(JstpValue, &str)> {
     match value(data) {
         IResult::Done(left, parsed) => Some((parsed, left)),
         _ => None,
