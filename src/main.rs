@@ -4,7 +4,8 @@ use jstp_parser::*;
 
 fn main() {
     println!(
-        "{:?}",
-        parse("[, , null, 'hai\\n\\\n second \\x0a', true, ]")
+        "{:?}\n{:?}",
+        parse("[, , null, '', '\\na', 'hai\\n\\\n second \\x0a', true, ]"),
+        parse("'nya \\u0439 \\u{1F496}'"),
     );
 }

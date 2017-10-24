@@ -1,4 +1,4 @@
-use std::str;
+use std::{char, str};
 use nom::digit;
 
 #[derive(Debug, Copy, Clone)]
@@ -125,5 +125,47 @@ named!(
 
 named!(
     unicode_escape_sequence<&str, StrChunk>,
-    map!(tag_s!("n"), |_| StrChunk::Char('\n'))
+    preceded!(
+        tag_s!("u"),
+        map_opt!(
+            alt!(es5_unicode_escape | es6_unicode_escape),
+            |code| char::from_u32(code).map(|c| StrChunk::Char(c))
+        )
+    )
+);
+
+named!(
+    es5_unicode_escape<&str, u32>,
+    map!(
+        tuple!(
+            hex_digit,
+            hex_digit,
+            hex_digit,
+            hex_digit
+        ),
+        |(a, b, c, d)| {
+            let val = |c: char| c.to_digit(16).unwrap();
+            val(a) * 0x1000 + val(b) * 0x100 + val(c) * 0x10 + val(d)
+        }
+    )
+);
+
+named!(
+    es6_unicode_escape<&str, u32>,
+    map!(
+        delimited!(
+            tag_s!("{"),
+            many_m_n!(1, 6, hex_digit),
+            tag_s!("}")
+        ),
+        |digits| {
+            let len = digits.len();
+            digits.into_iter()
+                .zip((0..len).rev())
+                .map(|(c, i)| {
+                    c.to_digit(16).unwrap() * u32::pow(0x10, i as u32)
+                })
+                .sum()
+        }
+    )
 );
