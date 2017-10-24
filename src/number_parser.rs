@@ -22,8 +22,20 @@ named!(
 named!(
     decimal_literal<&str, JsNumber>,
     alt!(
+        decimal_integer_literal |
         decimal_with_fractional |
         decimal_without_integer
+    )
+);
+
+named!(
+    decimal_integer_literal<&str, JsNumber>,
+    map_res!(
+        recognize!(terminated!(
+            decimal_integer,
+            peek!(not!(alt!(char!('.') | one_of!("eE"))))
+        )),
+        |input: &str| input.parse::<i64>().map(JsNumber::Integer)
     )
 );
 
