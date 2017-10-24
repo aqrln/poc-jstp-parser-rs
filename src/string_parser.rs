@@ -12,47 +12,60 @@ named!(
     alt!(single_quoted | double_quoted)
 );
 
-named!(
-    single_quoted<&str, String>,
-    delimited!(
-        tag_s!("'"),
-        map!(
-            many1!(alt!(
-                line_continuation | escape_sequence | single_quoted_chars
-            )),
-            |chunks: Vec<StrChunk>| {
-                let total_len = chunks.iter().map(|chunk| match *chunk {
-                    StrChunk::Slice(s) => s.len(),
-                    StrChunk::Char(c) => c.len_utf8(),
-                }).sum();
+macro_rules! string_parsers {
+    ( $( $name:ident => ( $tag:expr, $quote:expr ) ),* ) => {
+        $(named!{
+            $name<&str, String>,
+            delimited!(
+                tag_s!($tag),
+                map!(
+                    many1!(alt!(
+                        line_continuation |
+                        escape_sequence |
+                        map!(
+                            take_till_s!(|c| {
+                                c == $quote || is_chunk_terminator(c)
+                            }),
+                            StrChunk::Slice
+                        )
+                    )),
+                    aggregate_chunks
+                ),
+                tag_s!($tag)
+            )
+        })*
+    }
+}
 
-                let mut result = String::with_capacity(total_len);
-                for chunk in chunks {
-                    match chunk {
-                        StrChunk::Slice(s) => result.push_str(s),
-                        StrChunk::Char(c) => result.push(c),
-                    }
-                }
-
-                result
-            }
-        ),
-        tag_s!("'")
-    )
+string_parsers!(
+    single_quoted => ("'", '\''),
+    double_quoted => ("\"", '"')
 );
 
-named!(double_quoted<&str, String>, map!(tag_s!("\"\""), String::from));
+fn aggregate_chunks(chunks: Vec<StrChunk>) -> String {
+    let total_len = chunks.iter().map(|chunk| match *chunk {
+        StrChunk::Slice(s) => s.len(),
+        StrChunk::Char(c) => c.len_utf8(),
+    }).sum();
 
-named!(
-    single_quoted_chars<&str, StrChunk>,
-    map!(
-        take_till_s!(|c| match c {
-            '\'' | '\\' | '\n' | '\r' | '\u{2028}' | '\u{2029}' => true,
-            _ => false,
-        }),
-        StrChunk::Slice
-    )
-);
+    let mut result = String::with_capacity(total_len);
+
+    for chunk in chunks {
+        match chunk {
+            StrChunk::Slice(s) => result.push_str(s),
+            StrChunk::Char(c) => result.push(c),
+        }
+    }
+
+    result
+}
+
+fn is_chunk_terminator(c: char) -> bool {
+    match c {
+        '\\' | '\n' | '\r' | '\u{2028}' | '\u{2029}' => true,
+        _ => false,
+    }
+}
 
 named!(
     line_continuation<&str, StrChunk>,
