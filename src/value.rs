@@ -17,12 +17,12 @@ impl fmt::Display for JsNumber {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum JstpValue {
+pub enum JsValue {
     Undefined,
     Null,
     Bool(bool),
     Number(JsNumber),
     String(String),
-    Array(Vec<JstpValue>),
-    Object(HashMap<String, JstpValue>),
+    Array(Vec<JsValue>),
+    Object(HashMap<String, JsValue>),
 }

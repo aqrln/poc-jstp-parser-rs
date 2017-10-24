@@ -3,14 +3,14 @@ use std::char;
 
 use ucd::Codepoint;
 
-use value::JstpValue;
+use value::JsValue;
 use string_parser::{string, es6_unicode_escape};
 use number_parser::number;
 use parser::value;
 use str_chunk::StrChunk;
 
 named!(
-    pub object<&str, HashMap<String, JstpValue>>,
+    pub object<&str, HashMap<String, JsValue>>,
     map!(
         ws!(delimited!(
             tag_s!("{"),
@@ -24,7 +24,7 @@ named!(
 );
 
 named!(
-    key_value<&str, (String, JstpValue)>,
+    key_value<&str, (String, JsValue)>,
     ws!(separated_pair!(
         key,
         tag_s!(":"),

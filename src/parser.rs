@@ -1,5 +1,5 @@
 use nom::IResult;
-use value::JstpValue;
+use value::JsValue;
 
 use object_parser::object;
 use string_parser::string;
@@ -18,11 +18,11 @@ named!(
 );
 
 named!(
-    array<&str, Vec<JstpValue>>,
+    array<&str, Vec<JsValue>>,
     ws!(delimited!(
         tag_s!("["),
         many0!(alt!(
-            tag_s!(",") => { |_| JstpValue::Undefined } |
+            tag_s!(",") => { |_| JsValue::Undefined } |
             terminated!(value, tag_s!(",")) => { |v| v } |
             terminated!(value, peek!(tag_s!("]"))) => { |v| v }
         )),
@@ -31,19 +31,19 @@ named!(
 );
 
 named!(
-    pub value<&str, JstpValue>,
+    pub value<&str, JsValue>,
     ws!(alt!(
-        undefined => { |_| JstpValue::Undefined } |
-        null => { |_| JstpValue::Null } |
-        boolean => { |b| JstpValue::Bool(b) } |
-        array => { |v| JstpValue::Array(v) } |
-        string => { |s| JstpValue::String(s) } |
-        number => { |n| JstpValue::Number(n) } |
-        object => { |o| JstpValue::Object(o) }
+        undefined => { |_| JsValue::Undefined } |
+        null => { |_| JsValue::Null } |
+        boolean => { |b| JsValue::Bool(b) } |
+        array => { |v| JsValue::Array(v) } |
+        string => { |s| JsValue::String(s) } |
+        number => { |n| JsValue::Number(n) } |
+        object => { |o| JsValue::Object(o) }
     ))
 );
 
-pub fn parse(data: &str) -> Option<(JstpValue, &str)> {
+pub fn parse(data: &str) -> Option<(JsValue, &str)> {
     match value(data) {
         IResult::Done(left, parsed) => Some((parsed, left)),
         _ => None,
