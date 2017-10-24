@@ -123,7 +123,7 @@ fn is_bin_digit(c: char) -> bool {
 
 fn is_oct_digit(c: char) -> bool {
     match c {
-        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7'  => true,
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' => true,
         _ => false,
     }
 }
