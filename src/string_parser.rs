@@ -1,11 +1,7 @@
 use std::{char, str};
 use nom::digit;
 
-#[derive(Debug, Copy, Clone)]
-enum StrChunk<'a> {
-    Slice(&'a str),
-    Char(char),
-}
+use str_chunk::StrChunk;
 
 named!(
     pub string<&str, String>,
@@ -42,15 +38,15 @@ string_parsers!(
     double_quoted => ("\"", '"')
 );
 
-fn aggregate_chunks(chunks: Vec<StrChunk>) -> String {
-    let total_len = chunks
-        .iter()
-        .map(|chunk| match *chunk {
-            StrChunk::Slice(s) => s.len(),
-            StrChunk::Char(c) => c.len_utf8(),
-        })
-        .sum();
+fn is_chunk_terminator(c: char) -> bool {
+    match c {
+        '\\' | '\n' | '\r' | '\u{2028}' | '\u{2029}' => true,
+        _ => false,
+    }
+}
 
+fn aggregate_chunks(chunks: Vec<StrChunk>) -> String {
+    let total_len = chunks.iter().map(|chunk| chunk.len()).sum();
     let mut result = String::with_capacity(total_len);
 
     for chunk in chunks {
@@ -61,13 +57,6 @@ fn aggregate_chunks(chunks: Vec<StrChunk>) -> String {
     }
 
     result
-}
-
-fn is_chunk_terminator(c: char) -> bool {
-    match c {
-        '\\' | '\n' | '\r' | '\u{2028}' | '\u{2029}' => true,
-        _ => false,
-    }
 }
 
 named!(
@@ -167,7 +156,7 @@ named!(
 );
 
 named!(
-    es6_unicode_escape<&str, u32>,
+    pub es6_unicode_escape<&str, u32>,
     map!(
         delimited!(
             tag_s!("{"),
