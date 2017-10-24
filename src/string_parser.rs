@@ -1,27 +1,10 @@
 use std::str;
-use nom::{digit, HexDisplay};
+use nom::digit;
 
 #[derive(Debug, Copy, Clone)]
 enum StrChunk<'a> {
     Slice(&'a str),
     Char(char),
-}
-
-#[cfg(debug_assertions)]
-trait MyHexDisplay {
-    fn to_hex(&self, chunk_size: usize) -> String;
-    fn to_hex_from(&self, chunk_size: usize, from: usize) -> String;
-}
-
-#[cfg(debug_assertions)]
-impl MyHexDisplay for str {
-    fn to_hex(&self, chunk_size: usize) -> String {
-        self.as_bytes().to_hex(chunk_size)
-    }
-
-    fn to_hex_from(&self, chunk_size: usize, from: usize) -> String {
-        self.as_bytes().to_hex_from(chunk_size, from)
-    }
 }
 
 named!(
