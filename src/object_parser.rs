@@ -5,6 +5,7 @@ use ucd::Codepoint;
 
 use value::JstpValue;
 use string_parser::{string, es6_unicode_escape};
+use number_parser::number;
 use parser::value;
 use str_chunk::StrChunk;
 
@@ -35,7 +36,8 @@ named!(
     key<&str, String>,
     alt!(
         string |
-        ident
+        ident |
+        map!(number, |n| format!("{}", n))
     )
 );
 

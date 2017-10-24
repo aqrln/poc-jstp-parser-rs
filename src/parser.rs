@@ -3,6 +3,7 @@ use value::JstpValue;
 
 use object_parser::object;
 use string_parser::string;
+use number_parser::number;
 
 named!(undefined<&str, &str>, tag_s!("undefined"));
 
@@ -37,6 +38,7 @@ named!(
         boolean => { |b| JstpValue::Bool(b) } |
         array => { |v| JstpValue::Array(v) } |
         string => { |s| JstpValue::String(s) } |
+        number => { |n| JstpValue::Number(n) } |
         object => { |o| JstpValue::Object(o) }
     ))
 );
