@@ -1,6 +1,7 @@
 use nom::IResult;
 use value::JstpValue;
 
+use object_parser::object;
 use string_parser::string;
 
 named!(undefined<&str, &str>, tag_s!("undefined"));
@@ -29,13 +30,14 @@ named!(
 );
 
 named!(
-    value<&str, JstpValue>,
+    pub value<&str, JstpValue>,
     ws!(alt!(
         undefined => { |_| JstpValue::Undefined } |
         null => { |_| JstpValue::Null } |
         boolean => { |b| JstpValue::Bool(b) } |
         array => { |v| JstpValue::Array(v) } |
-        string => { |s| JstpValue::String(s) }
+        string => { |s| JstpValue::String(s) } |
+        object => { |o| JstpValue::Object(o) }
     ))
 );
 

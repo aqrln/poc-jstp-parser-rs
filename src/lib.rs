@@ -2,6 +2,7 @@
 extern crate nom;
 
 mod parser;
+mod object_parser;
 mod string_parser;
 mod value;
 
