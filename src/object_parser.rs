@@ -72,42 +72,34 @@ fn aggregate_id_chunks(start: StrChunk, cont: Vec<StrChunk>) -> String {
     result
 }
 
-named!(
-    id_start<&str, StrChunk>,
-    alt!(
-        map!(
-            take_while1_s!(is_ecma262_id_start),
-            StrChunk::Slice
-        ) |
-        map_opt!(
-            unicode_escape,
-            |c| if is_ecma262_id_start(c) {
-                Some(StrChunk::Char(c))
-            } else {
-                None
-            }
-        )
-    )
-);
+macro_rules! id_chunk {
+    ( $name:ident, $validator:expr ) => {
+        named!(
+            $name<&str, StrChunk>,
+            alt!(
+                map!(
+                    take_while1_s!($validator),
+                    StrChunk::Slice
+                ) |
+                map_opt!(
+                    unicode_escape,
+                    |c| if $validator(c) {
+                        Some(StrChunk::Char(c))
+                    } else {
+                        None
+                    }
+                )
+            )
+        );
+    }
+}
+
+id_chunk!(id_start, is_ecma262_id_start);
+id_chunk!(id_continue_part, is_ecma262_id_continue);
 
 named!(
     id_continue<&str, Vec<StrChunk>>,
-    many0!(
-        alt!(
-            map!(
-                take_while1_s!(is_ecma262_id_continue),
-                StrChunk::Slice
-            ) |
-            map_opt!(
-                unicode_escape,
-                |c| if is_ecma262_id_continue(c) {
-                    Some(StrChunk::Char(c))
-                } else {
-                    None
-                }
-            )
-        )
-    )
+    many0!(id_continue_part)
 );
 
 fn is_ecma262_id_start(c: char) -> bool {
