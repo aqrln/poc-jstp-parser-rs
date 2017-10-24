@@ -9,5 +9,5 @@ mod number_parser;
 mod value;
 mod str_chunk;
 
-pub use value::JstpValue;
+pub use value::{JsNumber, JstpValue};
 pub use parser::parse;
