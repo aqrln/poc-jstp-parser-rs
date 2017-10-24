@@ -12,6 +12,6 @@ fn main() {
         parse("\"i love \\\"-strings too\""),
         parse("{ 'nya': [ 'kawaii' ], 'a': true }"),
         parse("{ nya: 'kawaii', _: true, a18: '32' }"),
-        parse("[1, 2, 3, 10.3, -8, 7e-3]"),
+        parse("[1, 2, 3, 10.3, -8, 7e-3, 0xf, 0b10, 0o10]"),
     );
 }
