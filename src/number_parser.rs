@@ -63,25 +63,29 @@ named!(
 );
 
 named!(
-    decimal_integer<&str, ()>,
+    decimal_integer<&str, &str>,
     alt!(
-        map!(tag_s!("0"), |_| ()) |
-        map!(preceded!(
-            one_of!("123456789"),
-            many0!(one_of!("0123456789"))
-        ), |_| ())
+        tag_s!("0") |
+        preceded!(one_of!("123456789"), take_while_s!(is_decimal_digit))
     )
 );
 
 named!(
-    decimal_digits<&str, Vec<char>>,
-    many1!(one_of!("0123456789"))
+    decimal_digits<&str, &str>,
+    take_while1_s!(is_decimal_digit)
 );
 
 named!(
-    exponent_part<&str, Vec<char>>,
+    exponent_part<&str, &str>,
     preceded!(
         one_of!("eE"),
         preceded!(opt!(one_of!("+-")), decimal_digits)
     )
 );
+
+fn is_decimal_digit(c: char) -> bool {
+    match c {
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => true,
+        _ => false,
+    }
+}
