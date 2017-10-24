@@ -43,10 +43,13 @@ string_parsers!(
 );
 
 fn aggregate_chunks(chunks: Vec<StrChunk>) -> String {
-    let total_len = chunks.iter().map(|chunk| match *chunk {
-        StrChunk::Slice(s) => s.len(),
-        StrChunk::Char(c) => c.len_utf8(),
-    }).sum();
+    let total_len = chunks
+        .iter()
+        .map(|chunk| match *chunk {
+            StrChunk::Slice(s) => s.len(),
+            StrChunk::Char(c) => c.len_utf8(),
+        })
+        .sum();
 
     let mut result = String::with_capacity(total_len);
 
